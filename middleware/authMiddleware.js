@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User"); // Import User model if needed
 
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -11,7 +10,7 @@ const authMiddleware = (req, res, next) => {
     if (err) {
       return res.status(401).json({ error: 'Invalid token' });
     }
-    req.user = decoded; // Assuming the token contains user info
+    req.user = decoded; // Attach user info to request
     next();
   });
 };

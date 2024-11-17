@@ -29,6 +29,22 @@ const getAllListings = async (req, res) => {
     }
 };
 
+// Get a listing by ID
+const getListingById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const listing = await Listing.findOne({ where: { id } });
+        if (!listing) {
+            return res.status(404).json({ error: "Listing not found" });
+        }
+        res.status(200).json(listing);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
 // Update a listing
 const updateListing = async (req, res) => {
     const { id } = req.params;
@@ -66,4 +82,4 @@ const deleteListing = async (req, res) => {
     }
 };
 
-module.exports = { createListing, getAllListings, updateListing, deleteListing };
+module.exports = { createListing, getAllListings, updateListing, deleteListing, getListingById };

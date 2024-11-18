@@ -1,38 +1,14 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require("../config/db");
+const mongoose = require('mongoose');
 const User = require("./User"); // Import the User model
 
-const Listing = sequelize.define("Listing", {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: User,
-            key: 'id',
-        },
-    },
-    skillOffered: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    skillNeeded: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    description: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    },
+const listingSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    skillOffered: { type: String, required: true },
+    skillNeeded: { type: String, required: true },
+    description: { type: String, required: true },
 }, {
     timestamps: true,
 });
 
-User.hasMany(Listing, { foreignKey: 'userId' });
-Listing.belongsTo(User, { foreignKey: 'userId' });
-
+const Listing = mongoose.model('Listing', listingSchema);
 module.exports = Listing;

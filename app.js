@@ -1,40 +1,68 @@
 const express = require("express");
 const http = require("http");
-const socketIo = require("socket.io");
-const cors = require("cors"); // Import the cors package
-const sequelize = require("./config/db"); // Import the sequelize instance
+const { Server } = require("socket.io"); // Use Server from socket.io
+const cors = require("cors");
+const mongoose = require("./config/db"); // Update to use mongoose
 const authRoutes = require("./routes/authRoutes");
 const skillRoutes = require("./routes/skillRoutes");
 const listingRoutes = require("./routes/listingRoutes");
-const reviewRoutes = require("./routes/reviewRoutes"); // Import review routes
-const messageRoutes = require("./routes/messageRoutes"); // Import message routes
+const reviewRoutes = require("./routes/reviewRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+
+// Initialize the Express app
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
 
-// Enable CORS for localhost:3000
+// Set up Socket.IO with CORS
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+// Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000", // Allow requests from this origin
-    methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed methods
-    credentials: true, // Allow credentials (if needed)
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   })
 );
-
 app.use(express.json()); // Middleware to parse JSON requests
 
-// Use the authentication routes
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/listings", listingRoutes);
-app.use("/api/reviews", reviewRoutes); // Add reviews routes
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/messages", messageRoutes);
 
+// Socket.IO for Real-Time Messaging
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
 
-// Sync the database and start the server
+  // Handle a new message event
+  socket.on("sendMessage", (data) => {
+    console.log("New message received:", data);
+
+    // Broadcast the message to other connected clients
+    io.emit("receiveMessage", data);
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+  });
+});
+
+// Start the server
 const startServer = async () => {
   try {
-    await sequelize.sync(); // Sync models with the database
+    await mongoose.connect(process.env.MONGODB_URI, { // Connect to MongoDB
+      useUnifiedTopology: true,
+    });
     server.listen(process.env.PORT, () => {
       console.log(`Server is running on port ${process.env.PORT}`);
     });

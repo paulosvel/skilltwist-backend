@@ -1,32 +1,10 @@
-const { Sequelize, DataTypes } = require("sequelize");
-const sequelize = require("../config/db");
-const User = require("./User"); // Import User for association
+const mongoose = require('mongoose');
 
-const Skill = sequelize.define("Skill", {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: User,
-      key: "id",
-    },
-  },
-  skillType: {
-    type: DataTypes.ENUM("offered", "needed"),
-    allowNull: false,
-  },
-  skillName: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+const skillSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    skillType: { type: String, enum: ['offered', 'needed'], required: true },
+    skillName: { type: String, required: true },
 });
 
-User.hasMany(Skill, { foreignKey: "userId" });
-Skill.belongsTo(User, { foreignKey: "userId" });
-
+const Skill = mongoose.model('Skill', skillSchema);
 module.exports = Skill;

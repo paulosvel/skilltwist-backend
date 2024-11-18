@@ -1,23 +1,12 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const mongoose = require('mongoose');
 
-const sequelize = new Sequelize('database', 'email', 'password', {
-	host: 'localhost',
-	dialect: 'postgres',
+const messageSchema = new mongoose.Schema({
+    conversationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation', required: true },
+    senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    receiverId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    content: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
 });
 
-const Message = sequelize.define('Message', {
-	senderId: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-	},
-	receiverId: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-	},
-	message: {
-		type: DataTypes.STRING,
-		allowNull: false,
-	},
-}, { timestamps: true });
-
+const Message = mongoose.model('Message', messageSchema);
 module.exports = Message;

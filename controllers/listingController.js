@@ -21,7 +21,7 @@ const createListing = async (req, res) => {
 // Get all listings
 const getAllListings = async (req, res) => {
     try {
-        const listings = await Listing.findAll();
+        const listings = await Listing.find();
         res.status(200).json(listings);
     } catch (err) {
         console.error(err);
